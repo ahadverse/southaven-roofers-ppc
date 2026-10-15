@@ -3,7 +3,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CallButton } from "@/components/CallButton";
 import { Icon, type IconName } from "@/components/Icon";
 import { pageMetadata } from "@/lib/metadata";
-import { phone, site } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
+import { site } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Contact Southaven Roofers | Call for a Free Roof Estimate",
@@ -21,7 +22,8 @@ const reasons: { icon: IconName; title: string; href: string }[] = [
   { icon: "file", title: "I'm filing an insurance claim", href: "/roof-insurance-claims" },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { phone, callHours, contactEmail } = await getSettings();
   return (
     <>
       <section className="hero-surface">
@@ -42,7 +44,7 @@ export default function ContactPage() {
                   {phone.display}
                 </a>
                 <p className="mt-3 text-brand-200">
-                  {site.callHours ? `Phone lines: ${site.callHours}.` : "Tap the number to call from your phone."} Serving ZIP codes{" "}
+                  {callHours ? `Phone lines: ${callHours}.` : "Tap the number to call from your phone."} Serving ZIP codes{" "}
                   {site.zips.join(" & ")}.
                 </p>
                 <CallButton location="contact-button" size="lg" className="mt-6" />
@@ -84,8 +86,8 @@ export default function ContactPage() {
               terms and disclosure
             </Link>
             , email{" "}
-            <a href={`mailto:${site.contactEmail}`} className="font-semibold text-brand-700 underline">
-              {site.contactEmail}
+            <a href={`mailto:${contactEmail}`} className="font-semibold text-brand-700 underline">
+              {contactEmail}
             </a>
             .
           </p>

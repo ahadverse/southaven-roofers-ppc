@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { getCollection } from "@/lib/content";
 import { absoluteUrl, site } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [services, guides, blog] = await Promise.all([getCollection("services"), getCollection("guides"), getCollection("blog")]);
   const staticPages: { path: string; priority: number }[] = [
     { path: "/", priority: 1 },
     { path: "/services", priority: 0.9 },
@@ -16,9 +17,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const docs = [
-    ...getCollection("services").map((d) => ({ d, priority: 0.9 })),
-    ...getCollection("guides").map((d) => ({ d, priority: 0.8 })),
-    ...getCollection("blog").map((d) => ({ d, priority: 0.6 })),
+    ...services.map((d) => ({ d, priority: 0.9 })),
+    ...guides.map((d) => ({ d, priority: 0.8 })),
+    ...blog.map((d) => ({ d, priority: 0.6 })),
   ];
 
   return [

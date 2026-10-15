@@ -1,4 +1,5 @@
-import { absoluteUrl, phone, site, siteUrl } from "@/lib/site";
+import type { SiteSettings } from "@/lib/settings";
+import { absoluteUrl, site, siteUrl } from "@/lib/site";
 import type { Doc, Faq } from "@/lib/content";
 
 // Structured data stays truthful: an Organization (a referral service), never a
@@ -12,7 +13,7 @@ const southaven = {
   containedInPlace: { "@type": "State", name: "Mississippi" },
 };
 
-export function organizationSchema() {
+export function organizationSchema(settings: SiteSettings) {
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -22,7 +23,7 @@ export function organizationSchema() {
         name: site.name,
         url: siteUrl,
         logo: absoluteUrl("/icon.svg"),
-        telephone: phone.e164,
+        telephone: settings.phone.e164,
         description: site.disclosure,
         areaServed: southaven,
       },

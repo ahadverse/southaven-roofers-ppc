@@ -2,11 +2,11 @@ import Link from "next/link";
 import { CallButton } from "@/components/CallButton";
 import { Logo } from "@/components/Logo";
 import { getCollection } from "@/lib/content";
+import { getSettings } from "@/lib/settings";
 import { companyLinks, site } from "@/lib/site";
 
-export function Footer() {
-  const services = getCollection("services");
-  const guides = getCollection("guides");
+export async function Footer() {
+  const [services, guides, settings] = await Promise.all([getCollection("services"), getCollection("guides"), getSettings()]);
   const year = new Date().getFullYear();
 
   return (
@@ -19,7 +19,7 @@ export function Footer() {
           <Logo light />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-brand-200">{site.tagline}</p>
           <CallButton location="footer" className="mt-6" />
-          {site.callHours && <p className="mt-3 text-sm text-brand-200">Phone lines: {site.callHours}</p>}
+          {settings.callHours && <p className="mt-3 text-sm text-brand-200">Phone lines: {settings.callHours}</p>}
         </div>
 
         <div>

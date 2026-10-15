@@ -4,10 +4,12 @@ import { Icon } from "@/components/Icon";
 import { Logo } from "@/components/Logo";
 import { MobileNav } from "@/components/MobileNav";
 import { getCollection } from "@/lib/content";
-import { mainNav, phone } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
+import { mainNav } from "@/lib/site";
 
-export function Header() {
-  const services = getCollection("services").map((s) => ({ href: s.href, label: s.navLabel }));
+export async function Header() {
+  const [serviceDocs, { phone }] = await Promise.all([getCollection("services"), getSettings()]);
+  const services = serviceDocs.map((s) => ({ href: s.href, label: s.navLabel }));
 
   return (
     <header className="header-elevate sticky top-0 z-50 border-b border-brand-100/70 bg-white/95 backdrop-blur-md">

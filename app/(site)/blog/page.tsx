@@ -12,9 +12,8 @@ export const metadata = pageMetadata({
   path: "/blog",
 });
 
-export default function BlogIndexPage() {
-  const guides = getCollection("guides");
-  const posts = getCollection("blog");
+export default async function BlogIndexPage() {
+  const [guides, posts] = await Promise.all([getCollection("guides"), getCollection("blog")]);
 
   return (
     <>

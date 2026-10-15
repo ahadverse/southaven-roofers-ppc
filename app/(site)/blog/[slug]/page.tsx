@@ -4,21 +4,22 @@ import { docMetadata } from "@/lib/metadata";
 import { ArticleLayout } from "@/components/ArticleLayout";
 import { getCollection, getDoc } from "@/lib/content";
 
-export const dynamicParams = false;
+// New posts published in the admin panel render on first visit and are then cached.
+export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return getCollection("blog").map((d) => ({ slug: d.slug }));
+export async function generateStaticParams() {
+  return (await getCollection("blog")).map((d) => ({ slug: d.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const doc = getDoc("blog", slug);
+  const doc = await getDoc("blog", slug);
   return doc ? docMetadata(doc) : {};
 }
 
 export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
-  const doc = getDoc("blog", slug);
+  const doc = await getDoc("blog", slug);
   if (!doc) notFound();
 
   return (

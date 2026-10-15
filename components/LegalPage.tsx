@@ -4,8 +4,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { formatDate } from "@/components/Cards";
 import { getDoc } from "@/lib/content";
 
-export function LegalPage({ slug }: { slug: string }) {
-  const doc = getDoc("legal", slug);
+export async function LegalPage({ slug }: { slug: string }) {
+  const doc = await getDoc("legal", slug);
   if (!doc) notFound();
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-16 sm:px-6 lg:pt-10">

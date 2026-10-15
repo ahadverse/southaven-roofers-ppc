@@ -1,5 +1,5 @@
 import { Icon } from "@/components/Icon";
-import { phone } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
 
 type Variant = "primary" | "outline" | "light";
 type Size = "md" | "lg";
@@ -17,10 +17,10 @@ const sizes: Record<Size, string> = {
 };
 
 /**
- * Every call link goes through this component so the number always comes from env,
- * and `data-cta` tells analytics which button was tapped.
+ * Every call link goes through this component so the number always comes from the site settings
+ * (admin panel, falling back to env), and `data-cta` tells analytics which button was tapped.
  */
-export function CallButton({
+export async function CallButton({
   label = "Call for a Free Estimate",
   showNumber = true,
   variant = "primary",
@@ -35,6 +35,7 @@ export function CallButton({
   location: string;
   className?: string;
 }) {
+  const { phone } = await getSettings();
   return (
     <a
       href={phone.href}
@@ -56,7 +57,8 @@ export function CallButton({
   );
 }
 
-export function PhoneLink({ location, className = "" }: { location: string; className?: string }) {
+export async function PhoneLink({ location, className = "" }: { location: string; className?: string }) {
+  const { phone } = await getSettings();
   return (
     <a href={phone.href} data-cta={location} className={`font-bold whitespace-nowrap underline-offset-4 hover:underline ${className}`}>
       {phone.display}

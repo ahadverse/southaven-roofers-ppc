@@ -9,7 +9,8 @@ import { Icon } from "@/components/Icon";
 import type { Faq } from "@/lib/content";
 import { images } from "@/lib/images";
 import { pageMetadata } from "@/lib/metadata";
-import { phone, site } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
+import { site } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "How It Works | Southaven Roofers",
@@ -41,7 +42,8 @@ const faqs: Faq[] = [
   },
 ];
 
-export default function HowItWorksPage() {
+export default async function HowItWorksPage() {
+  const { phone, callHours } = await getSettings();
   const img = images["homeowner-phone-call"];
   return (
     <>
@@ -99,7 +101,7 @@ export default function HowItWorksPage() {
             </ul>
             <p className="mt-6 text-[15px] text-slate-600">
               Ready? Call <a href={phone.href} data-cta="how-inline" className="font-bold text-brand-700 underline">{phone.display}</a>.
-              {site.callHours && <> Phone lines: {site.callHours}.</>}
+              {callHours && <> Phone lines: {callHours}.</>}
             </p>
           </div>
           <div className="rounded-2xl border border-brand-200 bg-white p-6 sm:p-8">

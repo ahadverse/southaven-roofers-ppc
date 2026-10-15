@@ -2,7 +2,7 @@
 title: "Privacy Policy"
 metaTitle: "Privacy Policy | Southaven Roofers"
 description: "How Southaven Roofers handles information from website visits and phone calls, including call routing, call recording, analytics and your privacy choices."
-updated: 2026-10-14
+updated: 2026-10-15
 ---
 
 This Privacy Policy explains what information {{siteName}} collects when you visit {{siteUrl}} or call the phone number shown on the site, how that information is used and shared, and the choices you have. We have tried to keep it short and in plain English.
@@ -32,7 +32,7 @@ In this policy:
 The site does not ask you to type in your name, address, email or phone number. There are no contact forms, accounts, comment sections or newsletter sign-ups. The only information collected during a visit is technical:
 
 - **Server logs.** Like nearly every website, our hosting provider (Vercel) automatically records basic details when your browser requests a page, such as your **IP address**, your **browser and device type** (the "user agent"), the **pages requested**, the date and time, and the referring page if your browser sends one.
-- **Aggregated analytics.** We use Vercel Web Analytics, a cookieless analytics tool, to count page views and to record when a **call button is clicked** (which button and on which page). Details are in [Cookies and analytics](#cookies-and-analytics) below.
+- **Aggregated analytics.** We use Vercel Web Analytics, a cookieless analytics tool, to count page views and to record when a **call button is clicked** (which button and on which page). We also keep our own simple log of call-button taps. Details are in [Cookies and analytics](#cookies-and-analytics) below.
 
 ### When you call the phone number
 
@@ -77,6 +77,7 @@ The contractor who answers your call receives your phone number and caller ID in
 ### With hosting, analytics and email providers
 
 - **Vercel** hosts the website, keeps server logs and provides Vercel Web Analytics. You can read [Vercel's privacy notice](https://vercel.com/legal/privacy-policy) for how it handles data.
+- **MongoDB Atlas** stores the website's content and the call-button tap log described below.
 - **Our email provider** stores and delivers messages you send to {{contactEmail}}.
 
 These providers handle information on our behalf so the site can operate.
@@ -110,6 +111,10 @@ We use **Vercel Web Analytics**, which is designed to work **without cookies**. 
 - General location (such as country, state or city)
 - Device type, operating system and browser
 - Our custom **"call button clicked"** event, which records which call button was tapped and on which page. It does not record your phone number or anything about the call itself.
+
+We also keep **our own log of call-button taps** in the site’s database (hosted with MongoDB Atlas), so we can see which pages and buttons help homeowners reach a roofer. Each entry records only which button was tapped, the page it was on, the general device type (phone, tablet or computer), the referring website if any, and the time. It does **not** store your IP address, phone number, name, cookies or anything about the call itself.
+
+The site’s private admin area uses a login cookie for the site owner only. Visitors never receive it.
 
 Because the site does not track you across other websites or use advertising cookies, there is no cross-site tracking for browser settings like Do Not Track or Global Privacy Control to switch off. Our hosting provider may use technical security measures (for example, to block automated attacks) that work independently of us.
 

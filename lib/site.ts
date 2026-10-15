@@ -1,14 +1,5 @@
-// Single source of truth for brand, phone and site-wide text.
-// The phone number comes from NEXT_PUBLIC_PHONE_NUMBER (validated in next.config.ts).
-
-const rawPhone = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "";
-const digits = rawPhone.replace(/\D/g, "").slice(-10);
-
-export const phone = {
-  e164: rawPhone,
-  href: `tel:${rawPhone}`,
-  display: `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`,
-};
+// Brand and site-wide text. The phone number, call hours and contact email are
+// editable in the admin panel (see lib/settings.ts); env vars provide the defaults.
 
 const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
 export const siteUrl = (
@@ -28,10 +19,6 @@ export const site = {
   // Shown in the footer of every page and on /terms-and-disclosure. Keep it.
   disclosure:
     "Southaven Roofers is a free service that connects homeowners with independent local roofing contractors. We do not perform roofing work ourselves. Calls are answered by a participating contractor, who provides the estimate and any work directly to you.",
-  // Optional, e.g. "Mon–Sat, 7am–7pm". Leave unset if hours are not confirmed by your network.
-  callHours: process.env.NEXT_PUBLIC_CALL_HOURS ?? "",
-  // Where visitors can reach the site owner (privacy/legal questions). Calls go to contractors, not to you.
-  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@southavenroofers.com",
   lastReviewed: "2026-10-14",
 };
 

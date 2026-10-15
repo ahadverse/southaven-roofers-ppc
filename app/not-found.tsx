@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { CallButton } from "@/components/CallButton";
+import { SiteShell } from "@/components/SiteShell";
 
 export default function NotFound() {
   return (
+    <SiteShell>
     <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
       <p className="text-sm font-bold tracking-wider text-brand-600 uppercase">404</p>
       <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-ink">We couldn&apos;t find that page</h1>
@@ -19,5 +21,6 @@ export default function NotFound() {
         </Link>
       </div>
     </section>
+    </SiteShell>
   );
 }
