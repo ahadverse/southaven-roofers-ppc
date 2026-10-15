@@ -1,12 +1,12 @@
 import { Icon, type IconName } from "@/components/Icon";
 import { SectionHeader } from "@/components/ui";
-import { phone } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
 
-const steps: { icon: IconName; title: string; text: string }[] = [
+const buildSteps = (phoneDisplay: string): { icon: IconName; title: string; text: string }[] => [
   {
     icon: "phone",
     title: "Call us",
-    text: `Dial ${phone.display} and describe what's going on: a leak, missing shingles, hail or wind damage, or a roof that's simply getting old.`,
+    text: `Dial ${phoneDisplay} and describe what's going on: a leak, missing shingles, hail or wind damage, or a roof that's simply getting old.`,
   },
   {
     icon: "clipboard",
@@ -20,7 +20,7 @@ const steps: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-export function HowItWorks({
+export async function HowItWorks({
   heading = "How it works",
   eyebrow = "Simple process",
   center = false,
@@ -29,6 +29,8 @@ export function HowItWorks({
   eyebrow?: string;
   center?: boolean;
 }) {
+  const { phone } = await getSettings();
+  const steps = buildSteps(phone.display);
   return (
     <div>
       <SectionHeader eyebrow={eyebrow} title={heading} center={center} />

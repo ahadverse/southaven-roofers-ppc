@@ -16,25 +16,46 @@ Before publishing, run:
 
 ```bash
 npm run build                   # production build (fails if the phone number is missing)
+npm run db:seed                 # copy the starter content into MongoDB (first time only)
 npm run check:seo               # checks titles, descriptions, H1s, alt text, links, phone links
 node scripts/validate-content.mjs   # checks the markdown content files
 ```
 
 ---
 
-## Changing the phone number
+## Admin panel (/admin)
 
-The phone number is **never typed into the pages**. It comes from one environment variable:
+Log in at **`/admin`** with `ADMIN_USERNAME` / `ADMIN_PASSWORD` from your environment variables. From there you can:
 
-| Variable | Required | Example |
+- **Write and edit** blog posts, guides, service pages and the legal pages (SEO title/description counters, image picker, FAQs, related pages, sources, live preview, draft/published).
+- **Change the phone number**, call hours and contact email (**Phone & settings**). Every call button updates within seconds; no redeploy needed.
+- **See call-button stats**: taps per day, top pages, top buttons, devices and referrers.
+
+Everything is stored in **MongoDB** (`MONGODB_URI`). When you save, pages are rebuilt automatically on their next visit, so the site stays static and fast.
+
+> Call-button taps are not the same as connected calls. Your pay-per-call network's dashboard shows real calls and payouts.
+
+### Environment variables
+
+| Variable | Required | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_PHONE_NUMBER` | Yes | `+16625550100` (E.164: `+1` then 10 digits) |
+| `NEXT_PUBLIC_PHONE_NUMBER` | Yes | Default/fallback number, E.164 (`+16625550100`). The admin setting overrides it. |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | `https://southavenroofers.com` |
-| `NEXT_PUBLIC_CONTACT_EMAIL` | Recommended | `contact@southavenroofers.com` |
-| `NEXT_PUBLIC_CALL_HOURS` | Optional | `Mon–Sat, 7am–7pm` (only if your network confirms the hours) |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Recommended | Default contact email (editable in admin). |
+| `NEXT_PUBLIC_CALL_HOURS` | Optional | Only if your network confirms the hours (editable in admin). |
+| `MONGODB_URI` | For admin | MongoDB Atlas connection string. |
+| `MONGODB_DB` | Optional | Database name, default `southaven_roofers`. |
+| `ADMIN_USERNAME` | For admin | Default `admin`. |
+| `ADMIN_PASSWORD` | For admin | 10+ characters. |
+| `SESSION_SECRET` | For admin | 32+ random characters (signs the login cookie). |
+| `MONGODB_DNS_SERVERS` | Local only | `8.8.8.8,1.1.1.1` if you get `querySrv ECONNREFUSED` on your computer. Don't set it on Vercel. |
 
-**On Vercel:** Project → Settings → Environment Variables → edit `NEXT_PUBLIC_PHONE_NUMBER` → Deployments → **Redeploy**.
-The site is static, so a new number only appears after a redeploy.
+### MongoDB Atlas setup
+
+1. Create a free cluster at mongodb.com/atlas, then a **database user** (username + password).
+2. **Network Access → Add IP Address → Allow access from anywhere (0.0.0.0/0)** so Vercel can connect.
+3. **Connect → Drivers**, copy the `mongodb+srv://…` string into `MONGODB_URI`.
+4. Load the starter content once: `npm run db:seed` (or click **Import starter content** on the admin dashboard).
 
 ---
 
@@ -42,7 +63,7 @@ The site is static, so a new number only appears after a redeploy.
 
 1. Push this folder to a GitHub repository.
 2. In Vercel, click **Add New → Project** and import the repo (Next.js is detected automatically).
-3. Add the environment variables above, then click **Deploy**.
+3. Add the environment variables above (including `MONGODB_URI`, `ADMIN_PASSWORD` and `SESSION_SECRET`), then click **Deploy**.
 4. Add your domain under **Settings → Domains** and point DNS to Vercel.
 5. Optional: enable **Analytics** in the Vercel dashboard. The site already sends a `call_click` event (with the button location) every time someone taps a call button.
 
@@ -50,45 +71,16 @@ The site is static, so a new number only appears after a redeploy.
 
 ---
 
-## Editing content (no coding needed)
+## Editing content
 
-All articles are Markdown files:
+Use the **admin panel** for day-to-day editing. The Markdown files in `content/` are the **starter content**: they're imported into MongoDB once, and they're what the site shows if no database is configured. After importing, changes to `content/` files don't appear on the site unless you re-import with `npm run db:seed -- --overwrite` (which replaces admin edits).
 
-| Folder | URL | What it is |
-|---|---|---|
-| `content/services/` | `/roof-repair` | Service pages (11) |
-| `content/guides/` | `/roof-replacement-cost-southaven` | In-depth guides (4) |
-| `content/blog/` | `/blog/what-to-do-after-hail-storm` | Blog posts (6) |
-| `content/legal/` | `/privacy-policy` | Privacy policy & terms |
-
-Each file starts with a settings block (frontmatter):
-
-```yaml
----
-title: "Page heading (H1)"
-metaTitle: "Google title, max 60 characters"
-description: "Google description, 120–158 characters"
-navLabel: "Short menu label"
-excerpt: "Short teaser under the heading and on cards"
-image: roofer-nail-gun-shingles      # a key from lib/images.ts
-updated: 2026-10-14
-date: 2026-09-18                     # blog only
-category: "Storm Damage"             # blog only
-related: [roof-repair, roof-inspection]
-faqs:
-  - q: "Question?"
-    a: "Answer."
----
-```
-
-Inside the text you can place:
+Inside an article body you can place:
 
 - `[[cta]]` or `[[cta|Custom headline]]`: a "call now" box
-- `[[image:hailstones|Optional caption]]`: a photo (keys are listed in `lib/images.ts`)
+- `[[image:hailstones|Optional caption]]`: a photo (the editor's image picker lists every key)
 
-**To add a blog post:** copy an existing file in `content/blog/`, rename it (the file name becomes the URL), edit it, run `node scripts/validate-content.mjs blog`, and redeploy. It appears automatically on the blog page, in the sitemap and in "Keep reading" links.
-
-Home, How It Works, Contact and FAQ are in `app/` (`app/page.tsx`, `app/faq/page.tsx`, and so on).
+Home, How It Works, Contact and FAQ are coded pages in `app/(site)/`.
 
 ---
 

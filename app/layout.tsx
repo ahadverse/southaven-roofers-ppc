@@ -1,12 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import { CallTracking } from "@/components/CallTracking";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { JsonLd } from "@/components/JsonLd";
-import { StickyCallBar } from "@/components/StickyCallBar";
-import { organizationSchema } from "@/lib/schema";
 import { site, siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -40,24 +33,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-US" className={`${jakarta.variable} antialiased`}>
-      <body className="flex min-h-dvh flex-col font-sans">
-        <a
-          href="#main"
-          className="sr-only z-[60] rounded-lg bg-white px-4 py-2 font-semibold text-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
-        >
-          Skip to content
-        </a>
-        <Header />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <StickyCallBar />
-        <JsonLd data={organizationSchema()} />
-        <CallTracking />
-        {/* Vercel Web Analytics only exists on Vercel deployments */}
-        {process.env.VERCEL && <Analytics />}
-      </body>
+      <body id="top" className="flex min-h-dvh flex-col font-sans">{children}</body>
     </html>
   );
 }

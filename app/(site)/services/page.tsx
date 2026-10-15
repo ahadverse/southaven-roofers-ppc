@@ -14,9 +14,8 @@ export const metadata = pageMetadata({
   path: "/services",
 });
 
-export default function ServicesPage() {
-  const services = getCollection("services");
-  const guides = getCollection("guides");
+export default async function ServicesPage() {
+  const [services, guides] = await Promise.all([getCollection("services"), getCollection("guides")]);
 
   return (
     <>

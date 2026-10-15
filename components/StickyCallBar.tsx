@@ -1,8 +1,9 @@
 import { Icon } from "@/components/Icon";
-import { phone } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
 
 /** Mobile-only call bar pinned to the bottom of the screen. */
-export function StickyCallBar() {
+export async function StickyCallBar() {
+  const { phone } = await getSettings();
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 animate-slide-up border-t border-white/10 bg-brand-950/95 px-3 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] backdrop-blur-md md:hidden">
       <a

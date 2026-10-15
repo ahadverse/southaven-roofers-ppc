@@ -10,7 +10,8 @@ import { Eyebrow, FloatingBadge, IconChip, SectionHeader } from "@/components/ui
 import { getCollection, type Faq } from "@/lib/content";
 import { images } from "@/lib/images";
 import { pageMetadata } from "@/lib/metadata";
-import { phone, site } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
+import { site } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Southaven Roofers | Roof Repair & Replacement in Southaven, MS",
@@ -97,10 +98,14 @@ const homeFaqs: Faq[] = [
   },
 ];
 
-export default function HomePage() {
-  const services = getCollection("services");
-  const guides = getCollection("guides");
-  const posts = getCollection("blog").slice(0, 3);
+export default async function HomePage() {
+  const [services, guides, allPosts, { phone }] = await Promise.all([
+    getCollection("services"),
+    getCollection("guides"),
+    getCollection("blog"),
+    getSettings(),
+  ]);
+  const posts = allPosts.slice(0, 3);
   const hero = images["roofer-nail-gun-shingles"];
   const tower = images["southaven-water-tower"];
   const storm = images["tearoff-brick-home"];

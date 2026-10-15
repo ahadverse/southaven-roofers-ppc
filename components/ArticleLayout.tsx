@@ -12,7 +12,8 @@ import { Eyebrow, FloatingBadge } from "@/components/ui";
 import { getRelated, type Doc } from "@/lib/content";
 import { getImage } from "@/lib/images";
 import { articleSchema, serviceSchema } from "@/lib/schema";
-import { absoluteUrl, phone, site } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
+import { absoluteUrl, site } from "@/lib/site";
 
 const bullets: Record<Doc["collection"], string[]> = {
   services: ["Free, no-obligation estimate", "Local Southaven roofing contractors", "Help documenting storm damage for insurance"],
@@ -21,9 +22,9 @@ const bullets: Record<Doc["collection"], string[]> = {
   legal: [],
 };
 
-export function ArticleLayout({ doc, crumbs }: { doc: Doc; crumbs: Crumb[] }) {
+export async function ArticleLayout({ doc, crumbs }: { doc: Doc; crumbs: Crumb[] }) {
   const img = getImage(doc.image);
-  const related = getRelated(doc, 3);
+  const [related, { phone }] = await Promise.all([getRelated(doc, 3), getSettings()]);
   const location = `${doc.collection}-${doc.slug}`;
   const imageUrl = absoluteUrl(img.src.src);
   const isService = doc.collection === "services";

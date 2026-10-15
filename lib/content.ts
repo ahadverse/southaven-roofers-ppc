@@ -1,3 +1,4 @@
+import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 import { cache } from "react";
@@ -9,14 +10,44 @@ import remarkRehype from "remark-rehype";
 import rehypeSlug from "rehype-slug";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeStringify from "rehype-stringify";
+import { COLLECTIONS, getDb, isDbConfigured } from "@/lib/db";
 import { isImageKey, type ImageKey } from "@/lib/images";
-import { phone, site, siteUrl } from "@/lib/site";
+import { getSettings, type SiteSettings } from "@/lib/settings";
+import { site, siteUrl } from "@/lib/site";
 
-export type Collection = "services" | "guides" | "blog" | "legal";
+export const CONTENT_COLLECTIONS = ["services", "guides", "blog", "legal"] as const;
+export type Collection = (typeof CONTENT_COLLECTIONS)[number];
+export const isCollection = (value: string): value is Collection => (CONTENT_COLLECTIONS as readonly string[]).includes(value);
 
 export type Faq = { q: string; a: string };
 export type Source = { label: string; url: string };
 export type Heading = { id: string; text: string };
+export type DocStatus = "published" | "draft";
+
+/** The shape stored in MongoDB (and parsed from the starter markdown files). */
+export type RawDoc = {
+  collection: Collection;
+  slug: string;
+  status: DocStatus;
+  title: string;
+  metaTitle: string;
+  description: string;
+  navLabel: string;
+  excerpt: string;
+  image: string;
+  icon?: string;
+  order: number;
+  /** YYYY-MM-DD */
+  date: string;
+  /** YYYY-MM-DD */
+  updated: string;
+  category?: string;
+  faqs: Faq[];
+  related: string[];
+  sources: Source[];
+  /** Markdown body. Supports [[cta]] / [[cta|Headline]] and [[image:key|Caption]] markers. */
+  body: string;
+};
 
 /**
  * Body segments: plain HTML, a call-to-action box ([[cta]] in markdown),
@@ -27,32 +58,22 @@ export type Segment =
   | { kind: "cta"; text?: string }
   | { kind: "image"; key: ImageKey; caption?: string };
 
-export type Doc = {
-  collection: Collection;
-  slug: string;
+export type Doc = Omit<RawDoc, "body" | "image"> & {
   href: string;
-  title: string;
-  metaTitle: string;
-  description: string;
-  navLabel: string;
-  excerpt: string;
   image: ImageKey;
-  icon?: string;
-  order: number;
-  date: string;
-  updated: string;
-  category?: string;
-  faqs: Faq[];
-  related: string[];
-  sources: Source[];
   segments: Segment[];
   headings: Heading[];
   readingMinutes: number;
 };
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
+const DEFAULT_IMAGE: ImageKey = "roofer-nail-gun-shingles";
 
-const hrefFor = (collection: Collection, slug: string) => (collection === "blog" ? `/blog/${slug}` : `/${slug}`);
+export const hrefFor = (collection: Collection, slug: string) => (collection === "blog" ? `/blog/${slug}` : `/${slug}`);
+
+/* ------------------------------------------------------------------ */
+/* Markdown → HTML segments                                            */
+/* ------------------------------------------------------------------ */
 
 type HastNode = { type: string; tagName?: string; properties?: Record<string, unknown>; children?: HastNode[]; value?: string };
 
@@ -90,7 +111,7 @@ function rehypeWrapTables() {
 
 const MARKER = /<p>\[\[(cta|image:[a-z0-9-]+)(?:\|([^\]]*))?\]\]<\/p>/g;
 
-function toSegments(html: string, file: string): Segment[] {
+function toSegments(html: string): Segment[] {
   const segments: Segment[] = [];
   let last = 0;
   for (const match of html.matchAll(MARKER)) {
@@ -101,8 +122,8 @@ function toSegments(html: string, file: string): Segment[] {
       segments.push({ kind: "cta", text: extra?.trim() || undefined });
     } else {
       const key = token.slice("image:".length);
-      if (!isImageKey(key)) throw new Error(`${file}: unknown image key "${key}"`);
-      segments.push({ kind: "image", key, caption: extra?.trim() || undefined });
+      // Unknown image keys are skipped rather than breaking the page.
+      if (isImageKey(key)) segments.push({ kind: "image", key, caption: extra?.trim() || undefined });
     }
     last = (match.index ?? 0) + match[0].length;
   }
@@ -111,23 +132,13 @@ function toSegments(html: string, file: string): Segment[] {
   return segments;
 }
 
-function readDoc(collection: Collection, file: string): Doc {
-  const fullPath = path.join(CONTENT_DIR, collection, file);
-  const { data, content: raw } = matter(fs.readFileSync(fullPath, "utf8"));
-  const content = raw
-    .replaceAll("{{phone}}", phone.display)
+/** Turns a markdown body into renderable segments plus the h2 table of contents. */
+export function renderMarkdown(markdown: string, settings: SiteSettings): { segments: Segment[]; headings: Heading[] } {
+  const content = markdown
+    .replaceAll("{{phone}}", settings.phone.display)
     .replaceAll("{{siteName}}", site.name)
-    .replaceAll("{{contactEmail}}", site.contactEmail)
+    .replaceAll("{{contactEmail}}", settings.contactEmail)
     .replaceAll("{{siteUrl}}", siteUrl);
-  const slug = file.replace(/\.md$/, "");
-  const where = `content/${collection}/${file}`;
-
-  for (const field of ["title", "metaTitle", "description"]) {
-    if (!data[field]) throw new Error(`${where}: missing frontmatter "${field}"`);
-  }
-  const image = String(data.image ?? "roofer-nail-gun-shingles");
-  if (!isImageKey(image)) throw new Error(`${where}: unknown image key "${image}"`);
-
   const headings: Heading[] = [];
   const html = String(
     unified()
@@ -141,60 +152,105 @@ function readDoc(collection: Collection, file: string): Doc {
       .use(rehypeStringify)
       .processSync(content)
   );
+  return { segments: toSegments(html), headings };
+}
 
-  const toDate = (value: unknown) => (value instanceof Date ? value.toISOString().slice(0, 10) : String(value ?? ""));
-  const words = content.split(/\s+/).filter(Boolean).length;
-
+function processRaw(raw: RawDoc, settings: SiteSettings): Doc {
+  const { body, image, ...rest } = raw;
+  const { segments, headings } = renderMarkdown(body, settings);
+  const words = body.split(/\s+/).filter(Boolean).length;
   return {
-    collection,
-    slug,
-    href: hrefFor(collection, slug),
-    title: data.title,
-    metaTitle: data.metaTitle,
-    description: data.description,
-    navLabel: data.navLabel ?? data.title,
-    excerpt: data.excerpt ?? data.description,
-    image,
-    icon: data.icon,
-    order: Number(data.order ?? 99),
-    date: toDate(data.date ?? data.updated),
-    updated: toDate(data.updated ?? data.date),
-    category: data.category,
-    faqs: (data.faqs ?? []) as Faq[],
-    related: (data.related ?? []) as string[],
-    sources: (data.sources ?? []) as Source[],
-    segments: toSegments(html, where),
+    ...rest,
+    href: hrefFor(raw.collection, raw.slug),
+    image: isImageKey(image) ? image : DEFAULT_IMAGE,
+    segments,
     headings,
     readingMinutes: Math.max(1, Math.round(words / 230)),
   };
 }
 
-export const getCollection = cache((collection: Collection): Doc[] => {
+/* ------------------------------------------------------------------ */
+/* Sources: MongoDB (admin-managed) or the starter markdown files      */
+/* ------------------------------------------------------------------ */
+
+const toDate = (value: unknown) => (value instanceof Date ? value.toISOString().slice(0, 10) : String(value ?? ""));
+
+/** Parse the starter markdown files in /content (used for seeding and as a fallback). */
+export function readRawFromFiles(collection: Collection): RawDoc[] {
   const dir = path.join(CONTENT_DIR, collection);
+  if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith(".md"))
-    .map((f) => readDoc(collection, f))
-    .sort((a, b) =>
-      collection === "blog" ? b.date.localeCompare(a.date) : a.order - b.order || a.title.localeCompare(b.title)
-    );
-});
-
-export function getDoc(collection: Collection, slug: string): Doc | undefined {
-  return getCollection(collection).find((d) => d.slug === slug);
+    .map((file) => {
+      const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
+      return {
+        collection,
+        slug: file.replace(/\.md$/, ""),
+        status: "published",
+        title: data.title,
+        metaTitle: data.metaTitle,
+        description: data.description,
+        navLabel: data.navLabel ?? data.title,
+        excerpt: data.excerpt ?? data.description,
+        image: String(data.image ?? DEFAULT_IMAGE),
+        icon: data.icon,
+        order: Number(data.order ?? 99),
+        date: toDate(data.date ?? data.updated),
+        updated: toDate(data.updated ?? data.date),
+        category: data.category,
+        faqs: data.faqs ?? [],
+        related: data.related ?? [],
+        sources: data.sources ?? [],
+        body: content.trim(),
+      } satisfies RawDoc;
+    });
 }
 
-/** Services and guides share top-level URLs (/roof-repair, /roof-replacement-cost-southaven). */
-export function getPageDoc(slug: string): Doc | undefined {
-  return getDoc("services", slug) ?? getDoc("guides", slug);
+/** True once the admin database holds content (otherwise the markdown files are served). */
+const dbHasContent = cache(async (): Promise<boolean> => {
+  if (!isDbConfigured()) return false;
+  const db = await getDb();
+  return (await db.collection(COLLECTIONS.docs).estimatedDocumentCount()) > 0;
+});
+
+const loadRaw = cache(async (collection: Collection): Promise<RawDoc[]> => {
+  if (!(await dbHasContent())) return readRawFromFiles(collection);
+  const db = await getDb();
+  return db
+    .collection<RawDoc>(COLLECTIONS.docs)
+    .find({ collection, status: "published" }, { projection: { _id: 0 } })
+    .toArray();
+});
+
+const sortDocs = (collection: Collection, docs: Doc[]) =>
+  docs.sort((a, b) =>
+    collection === "blog" ? b.date.localeCompare(a.date) : a.order - b.order || a.title.localeCompare(b.title)
+  );
+
+export const getCollection = cache(async (collection: Collection): Promise<Doc[]> => {
+  const [raw, settings] = await Promise.all([loadRaw(collection), getSettings()]);
+  return sortDocs(
+    collection,
+    raw.map((r) => processRaw(r, settings))
+  );
+});
+
+export async function getDoc(collection: Collection, slug: string): Promise<Doc | undefined> {
+  return (await getCollection(collection)).find((d) => d.slug === slug);
+}
+
+/** Services, guides and legal pages share top-level URLs (/roof-repair, /privacy-policy). */
+export async function getPageDoc(slug: string): Promise<Doc | undefined> {
+  return (await getDoc("services", slug)) ?? (await getDoc("guides", slug));
 }
 
 /** Resolve a `related` slug from any collection. */
-export function findBySlug(slug: string): Doc | undefined {
-  return getPageDoc(slug) ?? getDoc("blog", slug);
+export async function findBySlug(slug: string): Promise<Doc | undefined> {
+  return (await getPageDoc(slug)) ?? (await getDoc("blog", slug));
 }
 
-export function getRelated(doc: Doc, limit = 3): Doc[] {
-  const picked = doc.related.map(findBySlug).filter((d): d is Doc => Boolean(d) && d!.slug !== doc.slug);
-  return picked.slice(0, limit);
+export async function getRelated(doc: Doc, limit = 3): Promise<Doc[]> {
+  const found = await Promise.all(doc.related.map(findBySlug));
+  return found.filter((d): d is Doc => Boolean(d) && d!.slug !== doc.slug).slice(0, limit);
 }

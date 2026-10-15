@@ -5,21 +5,23 @@ import { getCollection, getPageDoc } from "@/lib/content";
 import { docMetadata } from "@/lib/metadata";
 
 // Services and guides live at the top level, e.g. /roof-repair and /roof-replacement-cost-southaven.
-export const dynamicParams = false;
+// Pages added later in the admin panel render on first visit and are then cached (dynamicParams).
+export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return [...getCollection("services"), ...getCollection("guides")].map((d) => ({ slug: d.slug }));
+export async function generateStaticParams() {
+  const [services, guides] = await Promise.all([getCollection("services"), getCollection("guides")]);
+  return [...services, ...guides].map((d) => ({ slug: d.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const doc = getPageDoc(slug);
+  const doc = await getPageDoc(slug);
   return doc ? docMetadata(doc) : {};
 }
 
 export default async function Page({ params }: PageProps<"/[slug]">) {
   const { slug } = await params;
-  const doc = getPageDoc(slug);
+  const doc = await getPageDoc(slug);
   if (!doc) notFound();
 
   const crumbs =

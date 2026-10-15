@@ -3,10 +3,11 @@ import { CallButton } from "@/components/CallButton";
 import { Icon } from "@/components/Icon";
 import { Eyebrow } from "@/components/ui";
 import { images } from "@/lib/images";
-import { phone, site } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
 
 /** Compact call box placed inside long articles ([[cta]] marker). */
-export function InlineCta({ text, location }: { text?: string; location: string }) {
+export async function InlineCta({ text, location }: { text?: string; location: string }) {
+  const { phone } = await getSettings();
   return (
     <aside className="not-prose reveal relative my-10 overflow-hidden rounded-3xl bg-linear-to-br from-brand-800 to-brand-950 p-6 text-white shadow-lift sm:p-7">
       <span aria-hidden="true" className="absolute -top-16 -right-10 size-48 rounded-full bg-accent-400/25 blur-3xl" />
@@ -24,7 +25,7 @@ export function InlineCta({ text, location }: { text?: string; location: string 
 }
 
 /** Full-width closing call-to-action band. */
-export function CtaBand({
+export async function CtaBand({
   title = "Get a free roof estimate in Southaven",
   text = "Leaks, missing shingles, hail or wind damage, or a roof that has simply reached the end of its life: one call connects you with a local roofing contractor who can inspect it and tell you what it really needs.",
   location,
@@ -34,6 +35,7 @@ export function CtaBand({
   location: string;
 }) {
   const bg = images["storm-clouds-suburb"];
+  const { phone, callHours } = await getSettings();
   return (
     <section className="relative isolate overflow-hidden bg-brand-950">
       <Image src={bg.src} alt="" fill sizes="100vw" className="-z-20 object-cover opacity-35" />
@@ -69,7 +71,7 @@ export function CtaBand({
           </a>
           <CallButton location={location} size="lg" className="mt-6 w-full" showNumber={false} label="Tap to Call Now" />
           <p className="mt-3 text-xs text-brand-200">
-            {site.callHours ? `Phone lines: ${site.callHours}` : "No forms. No spam. No obligation."}
+            {callHours ? `Phone lines: ${callHours}` : "No forms. No spam. No obligation."}
           </p>
         </div>
       </div>
