@@ -1,0 +1,58 @@
+// Single source of truth for brand, phone and site-wide text.
+// The phone number comes from NEXT_PUBLIC_PHONE_NUMBER (validated in next.config.ts).
+
+const rawPhone = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "";
+const digits = rawPhone.replace(/\D/g, "").slice(-10);
+
+export const phone = {
+  e164: rawPhone,
+  href: `tel:${rawPhone}`,
+  display: `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`,
+};
+
+const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? (vercelUrl ? `https://${vercelUrl}` : "https://southavenroofers.com")
+).replace(/\/$/, "");
+
+export const site = {
+  name: "Southaven Roofers",
+  city: "Southaven",
+  state: "MS",
+  stateName: "Mississippi",
+  county: "DeSoto County",
+  zips: ["38671", "38672"],
+  tagline: "Roof repair, replacement and storm damage help for Southaven, MS homeowners.",
+  description:
+    "Need a roofer in Southaven, MS? Call for a free estimate on roof repair, roof replacement, and hail or storm damage from local Southaven roofing pros.",
+  // Shown in the footer of every page and on /terms-and-disclosure. Keep it.
+  disclosure:
+    "Southaven Roofers is a free service that connects homeowners with independent local roofing contractors. We do not perform roofing work ourselves. Calls are answered by a participating contractor, who provides the estimate and any work directly to you.",
+  // Optional, e.g. "Mon–Sat, 7am–7pm". Leave unset if hours are not confirmed by your network.
+  callHours: process.env.NEXT_PUBLIC_CALL_HOURS ?? "",
+  // Where visitors can reach the site owner (privacy/legal questions). Calls go to contractors, not to you.
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@southavenroofers.com",
+  lastReviewed: "2026-10-14",
+};
+
+export type NavLink = { href: string; label: string };
+
+export const mainNav: NavLink[] = [
+  { href: "/services", label: "Services" },
+  { href: "/storm-damage-roof-repair", label: "Storm Damage" },
+  { href: "/roof-replacement-cost-southaven", label: "Roof Cost" },
+  { href: "/how-it-works", label: "How It Works" },
+  { href: "/blog", label: "Blog" },
+];
+
+export const companyLinks: NavLink[] = [
+  { href: "/how-it-works", label: "How It Works" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/contact", label: "Contact" },
+  { href: "/blog", label: "Roofing Blog" },
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms-and-disclosure", label: "Terms & Disclosure" },
+  { href: "/photo-credits", label: "Photo Credits" },
+];
+
+export const absoluteUrl = (path: string) => `${siteUrl}${path === "/" ? "" : path}`;
