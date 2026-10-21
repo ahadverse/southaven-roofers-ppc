@@ -2,8 +2,9 @@
 
 _Last updated: 2026-10-15_
 
-The admin panel work was stopped partway. **The production build currently fails** because
-`app/admin/(panel)/content/[collection]/[id]/page.tsx` imports `components/admin/DocEditor`, which doesn't exist yet.
+The admin panel work was stopped partway. The production build failed because
+`app/admin/(panel)/content/[collection]/[id]/page.tsx` imported `components/admin/DocEditor`, which was never committed.
+`DocEditor.tsx` was written on 2026-10-22 and the build passes again. The dashboard (`/admin`) and settings pages below are still not built.
 
 ---
 
@@ -27,7 +28,7 @@ The admin panel work was stopped partway. **The production build currently fails
 
 ## A. Content editor
 
-- [ ] **1. Build `components/admin/DocEditor.tsx`** (client component). This is the main remaining piece:
+- [x] **1. Build `components/admin/DocEditor.tsx`** (client component). Done 2026-10-22 (build, lint and typecheck pass; not yet tested against a live MongoDB):
   - Basics: title, slug (auto-generated from the title for new docs), published/draft, menu label, excerpt,
     order (services/guides), publish date + category (blog), icon (services)
   - SEO: SEO title and meta description with character counters, Google-style preview
