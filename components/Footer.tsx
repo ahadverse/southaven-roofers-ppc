@@ -73,11 +73,7 @@ export async function Footer() {
             .
           </p>
           <p className="mt-3">
-            © {year} {site.name}. Serving {site.city}, {site.stateName} ({site.zips.join(", ")}). Photos are illustrative;{" "}
-            <Link href="/photo-credits" className="underline hover:text-white">
-              see photo credits
-            </Link>
-            .
+            © {year} {site.name}. Serving {site.city}, {site.stateName} ({site.zips.join(", ")}). Photos are illustrative.
           </p>
         </div>
       </div>

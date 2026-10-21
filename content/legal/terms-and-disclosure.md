@@ -83,7 +83,7 @@ The site links to other websites, such as government agencies, manufacturers and
 
 ## Intellectual property
 
-The text, design, layout and graphics of this site are owned by or licensed to {{siteName}} and are protected by copyright and other laws. Photos are used under their respective licenses; see [Photo Credits](/photo-credits) for details.
+The text, design, layout and graphics of this site are owned by or licensed to {{siteName}} and are protected by copyright and other laws. Photos are used under their respective licenses.
 
 You may view, print and share links to pages for your own personal, non-commercial use. You may not copy, republish, frame, scrape or sell the site's content without our written permission. Product names, program names and trademarks mentioned on the site belong to their respective owners, and mentioning them does not imply any affiliation or endorsement.
 

@@ -33,7 +33,6 @@ const validPaths = new Set([
   "/faq",
   "/privacy-policy",
   "/terms-and-disclosure",
-  "/photo-credits",
   ...slugs.services.map((s) => `/${s}`),
   ...slugs.guides.map((s) => `/${s}`),
   ...slugs.blog.map((s) => `/blog/${s}`),

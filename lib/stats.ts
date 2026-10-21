@@ -132,7 +132,6 @@ const STATIC_PAGES: Record<string, string> = {
   "/contact": "Contact",
   "/faq": "FAQ",
   "/blog": "Blog",
-  "/photo-credits": "Photo credits",
 };
 
 type DocInfo = { title: string; navLabel: string };

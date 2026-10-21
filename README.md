@@ -98,7 +98,7 @@ This site is a **referral service**, not a roofing company. To protect your payo
 
 ## Photos
 
-All photos are real and free to use: Pexels/Unsplash licenses, U.S. government public domain (FEMA, USACE), and two Creative Commons BY-SA images that require credit (shown on `/photo-credits`). Credits live in `lib/images.ts`. To add a photo, put a JPG (about 2000px wide) in `assets/images/`, import it in `lib/images.ts` with alt text and credit, and use its key.
+All photos are real and free to use: Pexels/Unsplash licenses, U.S. government public domain (FEMA, USACE), and two Creative Commons BY-SA images whose license requires credit. There is no public photo-credits page; the source/license metadata is kept in `lib/images.ts` for reference only. To add a photo, put a JPG (about 2000px wide) in `assets/images/`, import it in `lib/images.ts` with alt text and credit, and use its key.
 
 ---
 

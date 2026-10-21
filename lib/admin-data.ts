@@ -57,7 +57,7 @@ export const COLLECTION_LABELS: Record<Collection, { plural: string; singular: s
 
 /** Top-level URLs already used by the site (services and guides live at /{slug}). */
 const RESERVED_SLUGS = new Set([
-  "admin", "api", "blog", "services", "how-it-works", "contact", "faq", "photo-credits", "privacy-policy",
+  "admin", "api", "blog", "services", "how-it-works", "contact", "faq", "privacy-policy",
   "terms-and-disclosure", "sitemap.xml", "robots.txt", "icon.svg", "apple-icon.png", "og-default.jpg", "_next",
 ]);
 

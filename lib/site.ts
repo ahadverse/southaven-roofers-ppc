@@ -39,7 +39,6 @@ export const companyLinks: NavLink[] = [
   { href: "/blog", label: "Roofing Blog" },
   { href: "/privacy-policy", label: "Privacy Policy" },
   { href: "/terms-and-disclosure", label: "Terms & Disclosure" },
-  { href: "/photo-credits", label: "Photo Credits" },
 ];
 
 export const absoluteUrl = (path: string) => `${siteUrl}${path === "/" ? "" : path}`;
